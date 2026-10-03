@@ -2,8 +2,6 @@ package com.rafael.alugueldecarro.ui.navigation
 
 object Routes {
 
-    const val HOME = "home"
-
     const val DASHBOARD = "dashboard"
 
     const val LISTA_VEICULOS = "lista_veiculos"

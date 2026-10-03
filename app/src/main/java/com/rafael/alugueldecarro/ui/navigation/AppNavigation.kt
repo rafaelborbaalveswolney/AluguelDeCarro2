@@ -21,7 +21,6 @@ import com.rafael.alugueldecarro.ui.contato.ContatoViewModelFactory
 import com.rafael.alugueldecarro.ui.dashboard.DashboardScreen
 import com.rafael.alugueldecarro.ui.dashboard.DashboardViewModel
 import com.rafael.alugueldecarro.ui.dashboard.DashboardViewModelFactory
-import com.rafael.alugueldecarro.ui.home.HomeScreen
 import com.rafael.alugueldecarro.ui.locacao.HistoricoLocacoesScreen
 import com.rafael.alugueldecarro.ui.locacao.HistoricoViewModel
 import com.rafael.alugueldecarro.ui.locacao.HistoricoViewModelFactory
@@ -102,49 +101,11 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-
-        // Agora a Home é a primeira tela do app
-        startDestination = Routes.HOME
+        startDestination = Routes.DASHBOARD
     ) {
 
         // =====================================================
-        // HOME
-        // =====================================================
-
-        composable(
-            route = Routes.HOME
-        ) {
-
-            HomeScreen(
-
-                onNovaLocacao = {
-                    navController.navigate(
-                        Routes.NOVA_LOCACAO
-                    )
-                },
-
-                onLocacoesAtivas = {
-                    navController.navigate(
-                        Routes.DASHBOARD
-                    )
-                },
-
-                onVeiculos = {
-                    navController.navigate(
-                        Routes.LISTA_VEICULOS
-                    )
-                },
-
-                onHistorico = {
-                    navController.navigate(
-                        Routes.HISTORICO_LOCACOES
-                    )
-                }
-            )
-        }
-
-        // =====================================================
-        // LOCAÇÕES ATIVAS
+        // DASHBOARD - TELA INICIAL
         // =====================================================
 
         composable(
@@ -153,8 +114,7 @@ fun AppNavigation() {
 
             val viewModel: DashboardViewModel =
                 viewModel(
-                    factory =
-                        dashboardViewModelFactory
+                    factory = dashboardViewModelFactory
                 )
 
             DashboardScreen(
@@ -190,36 +150,30 @@ fun AppNavigation() {
 
             val veiculoViewModel: VeiculoViewModel =
                 viewModel(
-                    factory =
-                        veiculoViewModelFactory
+                    factory = veiculoViewModelFactory
                 )
 
             val syncViewModel: SyncViewModel =
                 viewModel(
-                    factory =
-                        syncViewModelFactory
+                    factory = syncViewModelFactory
                 )
 
             ListaVeiculosScreen(
-                viewModel =
-                    veiculoViewModel,
+                viewModel = veiculoViewModel,
 
                 mensagemSincronizacao =
                     syncViewModel.mensagem.value,
 
                 onNovoVeiculo = {
-
                     navController.navigate(
                         Routes.CADASTRO_VEICULO
                     )
                 },
 
                 onSincronizarVeiculo = { veiculo ->
-
-                    syncViewModel
-                        .sincronizarVeiculo(
-                            veiculo
-                        )
+                    syncViewModel.sincronizarVeiculo(
+                        veiculo
+                    )
                 }
             )
         }
@@ -234,8 +188,7 @@ fun AppNavigation() {
 
             val viewModel: VeiculoViewModel =
                 viewModel(
-                    factory =
-                        veiculoViewModelFactory
+                    factory = veiculoViewModelFactory
                 )
 
             CadastroVeiculoScreen(
@@ -257,8 +210,7 @@ fun AppNavigation() {
 
             val viewModel: LocacaoViewModel =
                 viewModel(
-                    factory =
-                        locacaoViewModelFactory
+                    factory = locacaoViewModelFactory
                 )
 
             val contatoNome =
@@ -294,15 +246,11 @@ fun AppNavigation() {
                     contatoId != null
                 ) {
 
-                    viewModel
-                        .selecionarCliente(
-                            nome =
-                                contatoNome,
-                            telefone =
-                                contatoTelefone,
-                            contatoId =
-                                contatoId
-                        )
+                    viewModel.selecionarCliente(
+                        nome = contatoNome,
+                        telefone = contatoTelefone,
+                        contatoId = contatoId
+                    )
 
                     backStackEntry
                         .savedStateHandle
@@ -328,14 +276,12 @@ fun AppNavigation() {
                 viewModel = viewModel,
 
                 onSelecionarCliente = {
-
                     navController.navigate(
                         Routes.CONTATOS
                     )
                 },
 
                 onLocacaoConcluida = {
-
                     navController.popBackStack()
                 }
             )
@@ -361,8 +307,7 @@ fun AppNavigation() {
 
             val viewModel: ContatoViewModel =
                 viewModel(
-                    factory =
-                        contatoViewModelFactory
+                    factory = contatoViewModelFactory
                 )
 
             ContatoScreen(
@@ -394,8 +339,7 @@ fun AppNavigation() {
                             contato.id
                         )
 
-                    navController
-                        .popBackStack()
+                    navController.popBackStack()
                 }
             )
         }
@@ -405,38 +349,29 @@ fun AppNavigation() {
         // =====================================================
 
         composable(
-            route =
-                Routes.HISTORICO_LOCACOES
+            route = Routes.HISTORICO_LOCACOES
         ) {
 
-            val historicoViewModel:
-                    HistoricoViewModel =
+            val historicoViewModel: HistoricoViewModel =
                 viewModel(
-                    factory =
-                        historicoViewModelFactory
+                    factory = historicoViewModelFactory
                 )
 
-            val syncViewModel:
-                    SyncViewModel =
+            val syncViewModel: SyncViewModel =
                 viewModel(
-                    factory =
-                        syncViewModelFactory
+                    factory = syncViewModelFactory
                 )
 
             HistoricoLocacoesScreen(
-                viewModel =
-                    historicoViewModel,
+                viewModel = historicoViewModel,
 
                 mensagemSincronizacao =
                     syncViewModel.mensagem.value,
 
-                onSincronizarLocacao = {
-                        locacao ->
-
-                    syncViewModel
-                        .sincronizarLocacao(
-                            locacao
-                        )
+                onSincronizarLocacao = { locacao ->
+                    syncViewModel.sincronizarLocacao(
+                        locacao
+                    )
                 }
             )
         }
