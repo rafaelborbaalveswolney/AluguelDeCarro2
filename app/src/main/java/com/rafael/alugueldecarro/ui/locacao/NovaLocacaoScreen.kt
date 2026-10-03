@@ -33,6 +33,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,13 +55,24 @@ fun NovaLocacaoScreen(
 ) {
 
     val veiculosDisponiveis by
-    viewModel.veiculosDisponiveis.collectAsStateWithLifecycle()
+    viewModel.veiculosDisponiveis
+        .collectAsStateWithLifecycle()
 
     val clienteSelecionado by
-    viewModel.clienteSelecionado.collectAsStateWithLifecycle()
+    viewModel.clienteSelecionado
+        .collectAsStateWithLifecycle()
 
     val mensagem by
-    viewModel.mensagem.collectAsStateWithLifecycle()
+    viewModel.mensagem
+        .collectAsStateWithLifecycle()
+
+    /*
+     * Agora observamos a confirmação real
+     * da gravação.
+     */
+    val locacaoConcluida by
+    viewModel.locacaoConcluida
+        .collectAsStateWithLifecycle()
 
     var veiculoSelecionado by remember {
         mutableStateOf<Veiculo?>(null)
@@ -93,6 +105,24 @@ fun NovaLocacaoScreen(
             dataEntrega = dataEntrega
         )
 
+    /*
+     * A navegação só acontece quando o ViewModel
+     * informar que a locação foi realmente
+     * concluída.
+     */
+    LaunchedEffect(
+        locacaoConcluida
+    ) {
+
+        if (locacaoConcluida) {
+
+            viewModel
+                .consumirLocacaoConcluida()
+
+            onLocacaoConcluida()
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -101,13 +131,23 @@ fun NovaLocacaoScreen(
 
                         Text(
                             text = "Nova Locação",
-                            style = MaterialTheme.typography.titleLarge
+                            style =
+                                MaterialTheme
+                                    .typography
+                                    .titleLarge
                         )
 
                         Text(
-                            text = "Preencha os dados da locação",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            text =
+                                "Preencha os dados da locação",
+                            style =
+                                MaterialTheme
+                                    .typography
+                                    .bodySmall,
+                            color =
+                                MaterialTheme
+                                    .colorScheme
+                                    .onSurfaceVariant
                         )
                     }
                 }
@@ -118,15 +158,27 @@ fun NovaLocacaoScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(
+                    paddingValues
+                )
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+
+            verticalArrangement =
+                Arrangement.spacedBy(
+                    14.dp
+                )
         ) {
 
+            // =================================================
             // VEÍCULO
+            // =================================================
+
             ExposedDropdownMenuBox(
-                expanded = menuVeiculosAberto,
+                expanded =
+                    menuVeiculosAberto,
+
                 onExpandedChange = {
+
                     menuVeiculosAberto =
                         !menuVeiculosAberto
                 }
@@ -134,9 +186,12 @@ fun NovaLocacaoScreen(
 
                 OutlinedTextField(
                     value =
-                        veiculoSelecionado?.let {
-                            "${it.marca} ${it.modelo} - ${it.placa}"
-                        } ?: "",
+                        veiculoSelecionado
+                            ?.let {
+
+                                "${it.marca} ${it.modelo} - ${it.placa}"
+
+                            } ?: "",
 
                     onValueChange = {},
 
@@ -147,18 +202,24 @@ fun NovaLocacaoScreen(
                     },
 
                     leadingIcon = {
+
                         Icon(
                             imageVector =
-                                Icons.Default.DirectionsCar,
-                            contentDescription = null
+                                Icons.Default
+                                    .DirectionsCar,
+
+                            contentDescription =
+                                null
                         )
                     },
 
                     trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(
-                            expanded =
-                                menuVeiculosAberto
-                        )
+
+                        ExposedDropdownMenuDefaults
+                            .TrailingIcon(
+                                expanded =
+                                    menuVeiculosAberto
+                            )
                     },
 
                     modifier = Modifier
@@ -171,53 +232,65 @@ fun NovaLocacaoScreen(
                         menuVeiculosAberto,
 
                     onDismissRequest = {
-                        menuVeiculosAberto = false
+
+                        menuVeiculosAberto =
+                            false
                     }
                 ) {
 
-                    veiculosDisponiveis.forEach { veiculo ->
+                    veiculosDisponiveis
+                        .forEach { veiculo ->
 
-                        DropdownMenuItem(
-                            text = {
+                            DropdownMenuItem(
+                                text = {
 
-                                Column {
+                                    Column {
 
-                                    Text(
-                                        text =
-                                            "${veiculo.marca} ${veiculo.modelo}"
-                                    )
+                                        Text(
+                                            text =
+                                                "${veiculo.marca} ${veiculo.modelo}"
+                                        )
 
-                                    Text(
-                                        text =
-                                            "${veiculo.placa} • R$ %.2f/dia"
-                                                .format(
-                                                    veiculo.valorDiaria
-                                                ),
-                                        style =
-                                            MaterialTheme.typography.bodySmall
-                                    )
+                                        Text(
+                                            text =
+                                                "${veiculo.placa} • R$ %.2f/dia"
+                                                    .format(
+                                                        veiculo.valorDiaria
+                                                    ),
+
+                                            style =
+                                                MaterialTheme
+                                                    .typography
+                                                    .bodySmall
+                                        )
+                                    }
+                                },
+
+                                onClick = {
+
+                                    veiculoSelecionado =
+                                        veiculo
+
+                                    menuVeiculosAberto =
+                                        false
                                 }
-                            },
-
-                            onClick = {
-
-                                veiculoSelecionado =
-                                    veiculo
-
-                                menuVeiculosAberto =
-                                    false
-                            }
-                        )
-                    }
+                            )
+                        }
                 }
             }
 
+            // =================================================
             // CLIENTE
+            // =================================================
+
             OutlinedTextField(
                 value =
-                    clienteSelecionado?.let {
-                        "${it.nome} - ${it.telefone}"
-                    } ?: "",
+                    clienteSelecionado
+                        ?.let {
+
+                            "${it.nome} - ${it.telefone}"
+
+                        } ?: "",
 
                 onValueChange = {},
 
@@ -228,67 +301,103 @@ fun NovaLocacaoScreen(
                 },
 
                 leadingIcon = {
+
                     Icon(
                         imageVector =
                             Icons.Default.Person,
-                        contentDescription = null
+
+                        contentDescription =
+                            null
                     )
                 },
 
                 placeholder = {
-                    Text("Nenhum cliente selecionado")
+
+                    Text(
+                        "Nenhum cliente selecionado"
+                    )
                 },
 
-                modifier = Modifier.fillMaxWidth()
+                modifier =
+                    Modifier.fillMaxWidth()
             )
 
             FilledTonalButton(
-                onClick = onSelecionarCliente,
-                modifier = Modifier.fillMaxWidth()
+                onClick =
+                    onSelecionarCliente,
+
+                modifier =
+                    Modifier.fillMaxWidth()
             ) {
 
                 Icon(
                     imageVector =
                         Icons.Default.Person,
-                    contentDescription = null
+
+                    contentDescription =
+                        null
                 )
 
                 Spacer(
-                    modifier = Modifier.width(8.dp)
+                    modifier =
+                        Modifier.width(8.dp)
                 )
 
-                Text("Selecionar Cliente")
+                Text(
+                    "Selecionar Cliente"
+                )
             }
 
+            // =================================================
             // DATAS
+            // =================================================
+
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier =
+                    Modifier.fillMaxWidth(),
+
                 horizontalArrangement =
-                    Arrangement.spacedBy(8.dp)
+                    Arrangement.spacedBy(
+                        8.dp
+                    )
             ) {
 
                 FilledTonalButton(
                     onClick = {
-                        mostrarDatePickerSaida = true
+
+                        mostrarDatePickerSaida =
+                            true
                     },
-                    modifier = Modifier.weight(1f)
+
+                    modifier =
+                        Modifier.weight(1f)
                 ) {
 
                     Icon(
                         imageVector =
-                            Icons.Default.CalendarMonth,
-                        contentDescription = null
+                            Icons.Default
+                                .CalendarMonth,
+
+                        contentDescription =
+                            null
                     )
 
                     Spacer(
-                        modifier = Modifier.width(6.dp)
+                        modifier =
+                            Modifier.width(6.dp)
                     )
 
                     Text(
                         text =
-                            if (dataSaida == null) {
+                            if (
+                                dataSaida ==
+                                null
+                            ) {
+
                                 "Saída"
+
                             } else {
+
                                 formatarData(
                                     dataSaida!!
                                 )
@@ -298,26 +407,40 @@ fun NovaLocacaoScreen(
 
                 FilledTonalButton(
                     onClick = {
-                        mostrarDatePickerEntrega = true
+
+                        mostrarDatePickerEntrega =
+                            true
                     },
-                    modifier = Modifier.weight(1f)
+
+                    modifier =
+                        Modifier.weight(1f)
                 ) {
 
                     Icon(
                         imageVector =
-                            Icons.Default.CalendarMonth,
-                        contentDescription = null
+                            Icons.Default
+                                .CalendarMonth,
+
+                        contentDescription =
+                            null
                     )
 
                     Spacer(
-                        modifier = Modifier.width(6.dp)
+                        modifier =
+                            Modifier.width(6.dp)
                     )
 
                     Text(
                         text =
-                            if (dataEntrega == null) {
+                            if (
+                                dataEntrega ==
+                                null
+                            ) {
+
                                 "Entrega"
+
                             } else {
+
                                 formatarData(
                                     dataEntrega!!
                                 )
@@ -326,49 +449,81 @@ fun NovaLocacaoScreen(
                 }
             }
 
-            // VALOR
-            Card(
-                modifier = Modifier.fillMaxWidth(),
+            // =================================================
+            // VALOR ESTIMADO
+            // =================================================
 
-                colors = CardDefaults.cardColors(
-                    containerColor =
-                        MaterialTheme.colorScheme.surfaceVariant
-                )
+            Card(
+                modifier =
+                    Modifier.fillMaxWidth(),
+
+                colors =
+                    CardDefaults.cardColors(
+                        containerColor =
+                            MaterialTheme
+                                .colorScheme
+                                .surfaceVariant
+                    )
             ) {
 
                 Column(
-                    modifier = Modifier.padding(16.dp)
+                    modifier =
+                        Modifier.padding(
+                            16.dp
+                        )
                 ) {
 
                     Text(
-                        text = "Valor estimado",
+                        text =
+                            "Valor estimado",
+
                         style =
-                            MaterialTheme.typography.bodyMedium,
+                            MaterialTheme
+                                .typography
+                                .bodyMedium,
+
                         color =
-                            MaterialTheme.colorScheme.onSurfaceVariant
+                            MaterialTheme
+                                .colorScheme
+                                .onSurfaceVariant
                     )
 
                     Spacer(
-                        modifier = Modifier.height(4.dp)
+                        modifier =
+                            Modifier.height(
+                                4.dp
+                            )
                     )
 
                     Text(
                         text =
-                            "R$ %.2f".format(
-                                valorTotal
-                            ),
+                            "R$ %.2f"
+                                .format(
+                                    valorTotal
+                                ),
+
                         style =
-                            MaterialTheme.typography.headlineSmall,
+                            MaterialTheme
+                                .typography
+                                .headlineSmall,
+
                         color =
-                            MaterialTheme.colorScheme.primary
+                            MaterialTheme
+                                .colorScheme
+                                .primary
                     )
                 }
             }
+
+            // =================================================
+            // MENSAGEM
+            // =================================================
 
             mensagem?.let {
 
                 Text(
                     text = it,
+
                     color =
                         if (
                             it.contains(
@@ -376,41 +531,51 @@ fun NovaLocacaoScreen(
                                 ignoreCase = true
                             )
                         ) {
-                            MaterialTheme.colorScheme.primary
+
+                            MaterialTheme
+                                .colorScheme
+                                .primary
+
                         } else {
-                            MaterialTheme.colorScheme.error
+
+                            MaterialTheme
+                                .colorScheme
+                                .error
                         }
                 )
             }
 
             Spacer(
-                modifier = Modifier.height(4.dp)
+                modifier =
+                    Modifier.height(
+                        4.dp
+                    )
             )
+
+            // =================================================
+            // CONFIRMAR
+            // =================================================
 
             Button(
                 onClick = {
 
-                    viewModel.confirmarLocacao(
-                        veiculo =
-                            veiculoSelecionado,
+                    /*
+                     * Agora apenas pedimos ao
+                     * ViewModel para confirmar.
+                     *
+                     * NÃO navegamos daqui.
+                     */
+                    viewModel
+                        .confirmarLocacao(
+                            veiculo =
+                                veiculoSelecionado,
 
-                        dataSaida =
-                            dataSaida,
+                            dataSaida =
+                                dataSaida,
 
-                        dataEntrega =
-                            dataEntrega
-                    )
-
-                    if (
-                        veiculoSelecionado != null &&
-                        clienteSelecionado != null &&
-                        dataSaida != null &&
-                        dataEntrega != null &&
-                        valorTotal > 0
-                    ) {
-
-                        onLocacaoConcluida()
-                    }
+                            dataEntrega =
+                                dataEntrega
+                        )
                 },
 
                 modifier = Modifier
@@ -421,26 +586,41 @@ fun NovaLocacaoScreen(
                 Icon(
                     imageVector =
                         Icons.Default.Save,
-                    contentDescription = null
+
+                    contentDescription =
+                        null
                 )
 
                 Spacer(
-                    modifier = Modifier.width(8.dp)
+                    modifier =
+                        Modifier.width(
+                            8.dp
+                        )
                 )
 
-                Text("Confirmar Locação")
+                Text(
+                    "Confirmar Locação"
+                )
             }
         }
     }
 
-    if (mostrarDatePickerSaida) {
+    // =========================================================
+    // DATE PICKER - SAÍDA
+    // =========================================================
+
+    if (
+        mostrarDatePickerSaida
+    ) {
 
         val datePickerState =
             rememberDatePickerState()
 
         DatePickerDialog(
             onDismissRequest = {
-                mostrarDatePickerSaida = false
+
+                mostrarDatePickerSaida =
+                    false
             },
 
             confirmButton = {
@@ -465,6 +645,7 @@ fun NovaLocacaoScreen(
 
                 TextButton(
                     onClick = {
+
                         mostrarDatePickerSaida =
                             false
                     }
@@ -476,19 +657,28 @@ fun NovaLocacaoScreen(
         ) {
 
             DatePicker(
-                state = datePickerState
+                state =
+                    datePickerState
             )
         }
     }
 
-    if (mostrarDatePickerEntrega) {
+    // =========================================================
+    // DATE PICKER - ENTREGA
+    // =========================================================
+
+    if (
+        mostrarDatePickerEntrega
+    ) {
 
         val datePickerState =
             rememberDatePickerState()
 
         DatePickerDialog(
             onDismissRequest = {
-                mostrarDatePickerEntrega = false
+
+                mostrarDatePickerEntrega =
+                    false
             },
 
             confirmButton = {
@@ -513,6 +703,7 @@ fun NovaLocacaoScreen(
 
                 TextButton(
                     onClick = {
+
                         mostrarDatePickerEntrega =
                             false
                     }
@@ -524,7 +715,8 @@ fun NovaLocacaoScreen(
         ) {
 
             DatePicker(
-                state = datePickerState
+                state =
+                    datePickerState
             )
         }
     }
@@ -534,14 +726,20 @@ private fun formatarData(
     dataMillis: Long
 ): String {
 
-    val data = Instant
-        .ofEpochMilli(dataMillis)
-        .atZone(ZoneId.systemDefault())
-        .toLocalDate()
+    val data =
+        Instant
+            .ofEpochMilli(
+                dataMillis
+            )
+            .atZone(
+                ZoneId.systemDefault()
+            )
+            .toLocalDate()
 
     return data.format(
-        DateTimeFormatter.ofPattern(
-            "dd/MM/yyyy"
-        )
+        DateTimeFormatter
+            .ofPattern(
+                "dd/MM/yyyy"
+            )
     )
 }

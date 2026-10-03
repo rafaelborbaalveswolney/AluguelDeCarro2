@@ -40,6 +40,16 @@ class LocacaoViewModel(
     val mensagem: StateFlow<String?> =
         _mensagem.asStateFlow()
 
+    /*
+     * Controla quando a locação foi realmente
+     * salva com sucesso.
+     */
+    private val _locacaoConcluida =
+        MutableStateFlow(false)
+
+    val locacaoConcluida: StateFlow<Boolean> =
+        _locacaoConcluida.asStateFlow()
+
     init {
         carregarVeiculosDisponiveis()
     }
@@ -52,7 +62,8 @@ class LocacaoViewModel(
                 .listarDisponiveis()
                 .collect { lista ->
 
-                    _veiculosDisponiveis.value = lista
+                    _veiculosDisponiveis.value =
+                        lista
                 }
         }
     }
@@ -77,11 +88,12 @@ class LocacaoViewModel(
 
             } else {
 
-                val novoCliente = Cliente(
-                    nome = nome,
-                    telefone = telefone,
-                    contatoId = contatoId
-                )
+                val novoCliente =
+                    Cliente(
+                        nome = nome,
+                        telefone = telefone,
+                        contatoId = contatoId
+                    )
 
                 val novoId =
                     clienteRepository.inserir(
@@ -110,15 +122,21 @@ class LocacaoViewModel(
             return 0.0
         }
 
-        val saida = Instant
-            .ofEpochMilli(dataSaida)
-            .atZone(ZoneId.systemDefault())
-            .toLocalDate()
+        val saida =
+            Instant
+                .ofEpochMilli(dataSaida)
+                .atZone(
+                    ZoneId.systemDefault()
+                )
+                .toLocalDate()
 
-        val entrega = Instant
-            .ofEpochMilli(dataEntrega)
-            .atZone(ZoneId.systemDefault())
-            .toLocalDate()
+        val entrega =
+            Instant
+                .ofEpochMilli(dataEntrega)
+                .atZone(
+                    ZoneId.systemDefault()
+                )
+                .toLocalDate()
 
         val dias =
             ChronoUnit.DAYS.between(
@@ -139,17 +157,22 @@ class LocacaoViewModel(
         dataEntrega: Long?
     ) {
 
-        val cliente = _clienteSelecionado.value
+        val cliente =
+            _clienteSelecionado.value
 
         if (veiculo == null) {
+
             _mensagem.value =
                 "Selecione um veículo."
+
             return
         }
 
         if (cliente == null) {
+
             _mensagem.value =
                 "Selecione um cliente."
+
             return
         }
 
@@ -157,49 +180,99 @@ class LocacaoViewModel(
             dataSaida == null ||
             dataEntrega == null
         ) {
+
             _mensagem.value =
                 "Selecione as datas."
+
             return
         }
 
         val valorTotal =
             calcularValorTotal(
-                veiculo,
-                dataSaida,
-                dataEntrega
+                veiculo = veiculo,
+                dataSaida = dataSaida,
+                dataEntrega = dataEntrega
             )
 
         if (valorTotal <= 0) {
+
             _mensagem.value =
                 "A data de entrega deve ser posterior à data de saída."
+
             return
         }
 
+        /*
+         * Só será true depois que toda a operação
+         * terminar com sucesso.
+         */
+        _locacaoConcluida.value = false
+
         viewModelScope.launch {
 
-            val locacao = Locacao(
-                veiculoId = veiculo.id,
-                clienteId = cliente.id,
-                dataSaida = dataSaida,
-                dataEntregaPrevista = dataEntrega,
-                valorTotal = valorTotal,
-                status = "ATIVA"
-            )
+            try {
 
-            locacaoRepository.inserir(locacao)
+                val locacao =
+                    Locacao(
+                        veiculoId = veiculo.id,
+                        clienteId = cliente.id,
+                        dataSaida = dataSaida,
+                        dataEntregaPrevista = dataEntrega,
+                        valorTotal = valorTotal,
+                        status = "ATIVA"
+                    )
 
-            veiculoRepository.atualizar(
-                veiculo.copy(
-                    status = "ALUGADO"
+                /*
+                 * Primeiro salva a locação.
+                 */
+                locacaoRepository.inserir(
+                    locacao
                 )
-            )
 
-            _mensagem.value =
-                "Locação realizada com sucesso."
+                /*
+                 * Depois altera o veículo
+                 * para ALUGADO.
+                 */
+                veiculoRepository.atualizar(
+                    veiculo.copy(
+                        status = "ALUGADO"
+                    )
+                )
+
+                /*
+                 * Somente depois das duas operações
+                 * concluídas informamos sucesso.
+                 */
+                _mensagem.value =
+                    "Locação realizada com sucesso."
+
+                _locacaoConcluida.value =
+                    true
+
+            } catch (e: Exception) {
+
+                _mensagem.value =
+                    "Não foi possível concluir a locação."
+
+                _locacaoConcluida.value =
+                    false
+            }
         }
     }
 
+    /*
+     * Chamado pela tela depois que o evento
+     * de sucesso for tratado.
+     */
+    fun consumirLocacaoConcluida() {
+
+        _locacaoConcluida.value =
+            false
+    }
+
     fun limparMensagem() {
-        _mensagem.value = null
+
+        _mensagem.value =
+            null
     }
 }
