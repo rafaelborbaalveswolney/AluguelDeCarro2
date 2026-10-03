@@ -66,12 +66,12 @@ O Dashboard apresenta apenas as locações com status **ATIVA**.
 
 Cada locação apresenta:
 
-- Marca, modelo e placa do veículo
-- Nome e telefone do cliente
-- Data de saída
-- Data prevista de entrega
-- Quantidade de dias restantes
-- Destaque visual para locações em atraso
+- marca, modelo e placa do veículo;
+- nome e telefone do cliente;
+- data de saída;
+- data prevista de entrega;
+- quantidade de dias restantes;
+- destaque visual para locações em atraso.
 
 Também é disponibilizado um botão flutuante para iniciar uma **Nova Locação**.
 
@@ -84,7 +84,7 @@ A tela **Frota de Veículos** permite:
 - visualizar os veículos cadastrados;
 - consultar marca, modelo, placa, ano e valor da diária;
 - visualizar o status atual do veículo;
-- alterar veículos disponíveis para manutenção;
+- colocar veículos disponíveis em manutenção;
 - disponibilizar novamente veículos em manutenção.
 
 Os status utilizados são:
@@ -123,9 +123,7 @@ A seleção de cliente utiliza os contatos cadastrados no dispositivo Android at
 
 O aplicativo solicita em tempo de execução a permissão:
 
-```text
-READ_CONTACTS
-```
+`READ_CONTACTS`
 
 Caso o usuário negue a permissão, é apresentada uma mensagem explicativa com opção para tentar novamente ou acessar as configurações do aplicativo.
 
@@ -133,9 +131,9 @@ A tela também permite filtrar os contatos por nome.
 
 Ao selecionar um contato, são utilizados:
 
-- Nome
-- Telefone
-- ID do contato
+- nome;
+- telefone;
+- ID do contato.
 
 ---
 
@@ -151,15 +149,14 @@ Na tela de **Nova Locação** é possível:
 
 O cálculo utiliza:
 
-```text
-Quantidade de dias x Valor da diária
-```
+`Quantidade de dias x Valor da diária`
 
 Ao confirmar a locação:
 
 - a locação é salva com status **ATIVA**;
 - o veículo passa automaticamente para o status **ALUGADO**;
-- a aplicação retorna ao Dashboard.
+- a navegação retorna ao Dashboard somente após a conclusão da gravação;
+- a nova locação passa a aparecer na lista de locações ativas.
 
 ---
 
@@ -210,11 +207,9 @@ O aplicativo utiliza **Room Database 3** para persistência local.
 
 As principais entidades são:
 
-```text
-VeiculoEntity
-ClienteEntity
-LocacaoEntity
-```
+- `VeiculoEntity`
+- `ClienteEntity`
+- `LocacaoEntity`
 
 A locação possui relacionamento com veículo e cliente utilizando:
 
@@ -235,9 +230,7 @@ Os ViewModels utilizam:
 
 As telas observam os estados utilizando:
 
-```text
-collectAsStateWithLifecycle()
-```
+`collectAsStateWithLifecycle()`
 
 Também são tratados estados de:
 
@@ -373,6 +366,20 @@ Exemplo de veículo vinculado a uma locação ativa.
 - [x] Tratamento de erro
 - [x] Tratamento de estado vazio
 - [x] Suporte a tema claro e escuro
+
+---
+
+## APK
+
+A versão compilada do aplicativo está disponível na seção **Releases** do repositório.
+
+Versão atual:
+
+`v1.0.0`
+
+Arquivo:
+
+`AluguelDeCarros-v1.0.0.apk`
 
 ---
 
